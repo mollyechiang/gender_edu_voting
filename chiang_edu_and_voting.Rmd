@@ -20,7 +20,7 @@ load("raw-data/UK Election Data Replication.RData")
 
 ## Abstract
 
-Marshall (2015) shows the causal effect of additional years of schooling on voting conservative in his analysis og voting records before and after the British 1947 school-leaving age reform. Marshall's figures and the results of his tables were replicated in Stata, but an update in the rdrobust package lead to my modification of his bandwidth selection code, and thus slightly different coefficients. In an extension of Marshall's work I investigated how his observed effect differed between genders. Running rdrobust and creating regression discontinuity figures on male and female subsets of the data revealed the effect of more years of education increasing likelihood of voting conservative was much stronger in women than men. This finding could complicate Marshall's argument that more education leads to higher income and then to more conservative political opinions and perhaps reveals something about the differing effect of education on men and women. 
+Marshall (2015) shows the causal effect of additional years of schooling on voting conservative in his analysis of voting records before and after the British 1947 school-leaving age reform. I successfully replicated Marshall's code, except an update in the rdrobust package lead to slightly different coefficients. In an extension of Marshall's work I investigated how his observed effect differed between genders. Running rdrobust and creating regression discontinuity figures on male and female subsets of the data revealed the effect of more years of education increasing likelihood of voting conservative was much stronger in women than men. This finding could complicate Marshall's argument that more education leads to higher income and then to more conservative political opinions and perhaps reveals something about the differing effect of education on men and women. 
 
 
 ## Introduction and Conclusion
@@ -51,7 +51,102 @@ Although I was able to replicate the values of Marshall's tables by running his 
  
 This paper relies heavily on rdrobust models, and the reference material for learning about this function and its package is from [@rdrobust].
 
-My replication process was guided by advice from [@king].
+```{r data for graphic}
+
+# first select only the relevant columns and years 
+# years 1925-1970 were used by Marshall in figure 3
+# year at 14 gives the cohort year, and con is the column
+# where 1 indicates voting conservative, and 0 is not
+
+x <- table %>%
+  select(yearat14, con) %>%
+  filter(yearat14 >= 1925 & yearat14 <= 1970)
+
+# in order to calculate the percentage of votes that were
+# conservative each year I made two tables
+
+# first I simply calculated the total number of individuals
+# that were surveyed each year
+
+num_per_year <- x %>%
+  group_by(yearat14) %>%
+  count()
+
+# then I coundted the number of conservative votes in
+# that year 
+
+num_con_per_year <- x %>%
+  group_by(yearat14) %>%
+  count(con) %>%
+  filter(con == 1)
+
+# then I used left join to combine these two tables by year
+# I replaced instances were the con or n.y (which was number
+# of conservative votes that were 1) column was NA with 0 
+# in order to include those instances in our calculations
+# then I created a proportion column by dividing n.y (number
+# of conservative votes) by n.x (number of voters per year)
+# for each year
+
+# I also split the table into two groups by creating a 
+# group column. The groups were created by splitting the
+# data about the year 1947, as was done in Figure 3 of 
+# Marshall 2015, in order to see how voting conservative 
+# changed after that year. 
+
+con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
+  replace_na(list(con = 0, n.y = 0)) %>%
+  summarize(con_prop = n.y/n.x) %>%
+  
+  # 1925-1947 is 23 years and 1947-1970 is 23 years
+  
+  mutate(group = c(rep("1", 23), rep("2", 23)))
+
+```
+
+```{r graphic}
+
+# here the graphic is created from the con_props data
+# with yearat14 as the x axis and proportion that voted
+# conservative as the y axis. The points were colored
+# by their group (which side of 1947 they were on)
+
+ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  
+  # I added a geom_vline at 1947 so the year would be 
+  # more obvious when looking at the graph
+  
+  geom_vline(xintercept = 1947) + 
+  
+  # I added best fit lines to each side of 1947
+  # method was set to loess  to get a polynomial
+  # fit for each group as was done in Figure 3 of
+  # Marshall 2015
+  
+  geom_smooth(se = FALSE, method = "loess") +
+  
+  # titles, labels, and caption was then added
+  
+  labs(title = "Conservative Vote Share Before and After 1947",
+       subtitle = "A replication of Figure 3 from Marshall 2015 in R",
+       x = "Cohort (year at age 14)",
+       y = "Proportion of Cohort Voting Conservative",
+       caption = "Figure 3: This figure is a replication of Figure 3 (Marshall 2015) in R instead of Stata, it illustrates the jump in \nproportion of a cohort, or class, of British individuals (classified by the year at which they were 14), after the \neducation reform in 1947 which increased the year at which you could legally leave high school from 14 to 15.") +
+  
+  # remove legend and right align caption
+  
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust = 0))
+
+```
+
+
+![Marshall Decrease in Leaving School after 1947 (Figure 1) Replicated in Stata](Tables_and_Figures/Figure1.png)
+
+![Marshall Continuity Tests (Figure 2) Replicated in Stata](Tables_and_Figures/Figure2.png)
+
+![Marshall Years of Schooling and Voting Conservativue (Figure 3) Replicated in Stata](Tables_and_Figures/Figure3.png)
 
 
 ## Extension
@@ -186,106 +281,6 @@ ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) +
 
 
 ```
-
-
-## Replicated Tables and Figures
-
-```{r data for graphic}
-
-# first select only the relevant columns and years 
-# years 1925-1970 were used by Marshall in figure 3
-# year at 14 gives the cohort year, and con is the column
-# where 1 indicates voting conservative, and 0 is not
-
-x <- table %>%
-  select(yearat14, con) %>%
-  filter(yearat14 >= 1925 & yearat14 <= 1970)
-
-# in order to calculate the percentage of votes that were
-# conservative each year I made two tables
-
-# first I simply calculated the total number of individuals
-# that were surveyed each year
-
-num_per_year <- x %>%
-  group_by(yearat14) %>%
-  count()
-
-# then I coundted the number of conservative votes in
-# that year 
-
-num_con_per_year <- x %>%
-  group_by(yearat14) %>%
-  count(con) %>%
-  filter(con == 1)
-
-# then I used left join to combine these two tables by year
-# I replaced instances were the con or n.y (which was number
-# of conservative votes that were 1) column was NA with 0 
-# in order to include those instances in our calculations
-# then I created a proportion column by dividing n.y (number
-# of conservative votes) by n.x (number of voters per year)
-# for each year
-
-# I also split the table into two groups by creating a 
-# group column. The groups were created by splitting the
-# data about the year 1947, as was done in Figure 3 of 
-# Marshall 2015, in order to see how voting conservative 
-# changed after that year. 
-
-con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
-  replace_na(list(con = 0, n.y = 0)) %>%
-  summarize(con_prop = n.y/n.x) %>%
-  
-  # 1925-1947 is 23 years and 1947-1970 is 23 years
-  
-  mutate(group = c(rep("1", 23), rep("2", 23)))
-
-```
-
-```{r graphic}
-
-# here the graphic is created from the con_props data
-# with yearat14 as the x axis and proportion that voted
-# conservative as the y axis. The points were colored
-# by their group (which side of 1947 they were on)
-
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
-  geom_point() +
-  
-  # I added a geom_vline at 1947 so the year would be 
-  # more obvious when looking at the graph
-  
-  geom_vline(xintercept = 1947) + 
-  
-  # I added best fit lines to each side of 1947
-  # method was set to loess  to get a polynomial
-  # fit for each group as was done in Figure 3 of
-  # Marshall 2015
-  
-  geom_smooth(se = FALSE, method = "loess") +
-  
-  # titles, labels, and caption was then added
-  
-  labs(title = "Conservative Vote Share Before and After 1947",
-       subtitle = "A replication of Figure 3 from Marshall 2015 in R",
-       x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 3: This figure is a replication of Figure 3 (Marshall 2015) in R instead of Stata, it illustrates the jump in \nproportion of a cohort, or class, of British individuals (classified by the year at which they were 14), after the \neducation reform in 1947 which increased the year at which you could legally leave high school from 14 to 15.") +
-  
-  # remove legend and right align caption
-  
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
-
-```
-
-
-![Marshall Decrease in Leaving School after 1947 (Figure 1) Replicated in Stata](Tables_and_Figures/Figure1.png)
-
-![Marshall Continuity Tests (Figure 2) Replicated in Stata](Tables_and_Figures/Figure2.png)
-
-![Marshall Years of Schooling and Voting Conservativue (Figure 3) Replicated in Stata](Tables_and_Figures/Figure3.png)
 
 
 
