@@ -66,11 +66,127 @@ This paper relies heavily on rdrobust models, and the reference material for lea
 
 ## Extension
 
+```{r women graphs}
+
+w <- table %>%
+  select(yearat14, con, male) %>%
+  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
+  filter(male == 0)
+
+w_num_per_year <- w %>%
+  group_by(yearat14) %>%
+  count()
+
+w_num_con_per_year <- w %>%
+  group_by(yearat14) %>%
+  count(con) %>%
+  filter(con == 1)
+
+w_con_props <- left_join(w_num_per_year, w_num_con_per_year, by = "yearat14") %>%
+  replace_na(list(con = 0, n.y = 0)) %>%
+  summarize(con_prop = n.y/n.x) %>%
+  mutate(group = c(rep("1", 23), rep("2", 23)))
+
+w_poly <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(title = "female",
+       x = "Cohort (year at age 14)",
+       y = " ") +
+  theme(legend.position = "none")
+
+w_linear <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "lm") +
+  labs(title = "female",
+       x = "Cohort (year at age 14)",
+       y = " ") +
+  theme(legend.position = "none")
+
+
+```
+
+```{r men graphs}
+
+m <- table %>%
+  select(yearat14, con, male) %>%
+  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
+  filter(male == 1)
+
+m_num_per_year <- m %>%
+  group_by(yearat14) %>%
+  count()
+
+m_num_con_per_year <- m %>%
+  group_by(yearat14) %>%
+  count(con) %>%
+  filter(con == 1)
+
+m_con_props <- left_join(m_num_per_year, m_num_con_per_year, by = "yearat14") %>%
+  replace_na(list(con = 0, n.y = 0)) %>%
+  summarize(con_prop = n.y/n.x) %>%
+  mutate(group = c(rep("1", 23), rep("2", 23)))
+
+m_poly <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(title = "male",
+       x = "Cohort (year at age 14)",
+       y = "Proportion Voting Conservative") +
+  theme(legend.position = "none")
+
+m_linear <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "lm") +
+  labs(title = "male",
+       x = "Cohort (year at age 14)",
+       y = "Proportion Voting Conservative") +
+  theme(legend.position = "none")
+
+
+```
+
 Marshall (2015) proved that education attainment significantly increased after the 1947 school-leaving age reform in Great Britain. He deomstrated, using this reform and regression discontinuity design, that as years of schooling increased, so did one's likelihood to vote conservative, also ensuring other covariatives maintained continuity around this cutoff. His explanation for this finding was that increased schooling leads to higher income and then more conservative voting based on economic policies. In my extension of his work, I examined treatment effect heterogenity, specifiacllt how Marshall's results differed when subsetting his data for males and females. 
 
-Creating regression discontinuity figures on just the male and female subsets of the data revealed the effect of more years of education increasing probabiliy of voting conservative was much stronger in women than men. In addition, when running rdrobust, the coefficient for the female subset was considerably higher than the coefficient of the male subset (with the both gender coeffecient being intermediate). 
+Creating regression discontinuity figures on just the male and female subsets of the data revealed the effect of more years of education increasing probabiliy of voting conservative was much stronger in women than men (Figure 1). These figures were created with fourth-degree polynomial fits as was used in Marshall (2015). In addition, when running rdrobust, the coefficient for the female subset was considerably higher than the coefficient of the male subset (with the both gender coeffecient being intermediate). 
 
-In addition to creating regression discontinuity figures, 
+In addition to creating regression discontinuity figures with fourth-degree polynomials, I also created the figures with linear fits (Figure 2). This choice was guided by Gelman and Zelizer (2015), where it was argued 3rd and 4th degree polynomials, although commonly used for regression discontinuity, can lead to overfitting and the validating of causal inferences that are arbitrary and substantively implausible [@gelman]. However, in this case, even when switching to linear fits, the discontinuity around 1947 is clear, both overall (see appendix), for females and even males where the polynomial fit indicated little discontinuity.
+
+```{r combined plots poly}
+
+combine_plots(m_poly, 
+              w_poly,
+              labels = c("(a)", "(b)"),
+              label_size = 12,
+              hjust = -1.5,
+              vjust = 1.7,
+              title.text = "Differing Conservative Vote Share in Men and Women Before and After 1947",
+              title.size = 12,
+              sub.text = "Figure 1: The change in proportion of individuals in each class voting conservative around the implementation of the \n British school-leaving age reform in 1947, subset by gender. Curves represent fourth order polynomial fits on either \n side of the 1947 discontinuity in (a), as was done in Marshall (2015).",
+              sub.size = 8)
+
+```
+
+
+
+```{r combined plots linear }
+
+combine_plots(m_linear, 
+              w_linear,
+              labels = c("(a)", "(b)"),
+              label_size = 12,
+              hjust = -1.5,
+              vjust = 1.7,
+              title.text = "Linear Fit of Conservative Vote Share Around 1947",
+              title.size = 13,
+              sub.text = "Figure 2: The change in proportion of individuals in each class voting conservative around the implementation of the \nBritish school-leaving age reform in 1947, subset by gender. Curves represent linear fits on either side of the \n1947 discontinuity as reccomended by Gelman (2015).",
+              sub.size = 8)
+
+```
 
 The RDD I ran for the extension was based on what Marshall (2015) ran. I set my dependent variable to con (0 or 1 for if the individual voted conservative) and the independent variable to yearat14 (yearat14 of 1947 is the first class of individuals who were forced to stay in school an extra year). I set the cutoff to the year of the reform, 1947, and like Marshall, set the order of the point-estimator local-polynomial to 1, the order of the bias-correction local-polynomial to 2, and the kernal function to triangular. Finally, differing from Marshall, I set bwselect = "mserd," as that is the updated version of the now-deprecated bwselect(IK). The table with the results of these regression contains the standard-form coefficients and their associated standard error and p-values.
 
@@ -123,117 +239,6 @@ The coefficient when running RDD is an indicator of causailty of the forcing var
 The results of this extension complicate Marshall's argument that more education leads to higher income and then to more conservative political opinions. Women did not have a lot of space for income advancement in the 1940s and 50s in comparision to men, and thus Marshall's explanation would likely assume women would thus have a smaller increase in voting conservative in response to more education, but this extension shows the opposite.
 
 In addition, this extension perhaps reveals something about the differing effect of education on men and women. Are women's political views more responsive to education? Women are generally more liberal then men, how does this result fit into this narrative? This extension certainly opens space for much more investigation on gender, education, and political views.
-
-
-```{r women graphs}
-
-w <- table %>%
-  select(yearat14, con, male) %>%
-  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
-  filter(male == 0)
-
-w_num_per_year <- w %>%
-  group_by(yearat14) %>%
-  count()
-
-w_num_con_per_year <- w %>%
-  group_by(yearat14) %>%
-  count(con) %>%
-  filter(con == 1)
-
-w_con_props <- left_join(w_num_per_year, w_num_con_per_year, by = "yearat14") %>%
-  replace_na(list(con = 0, n.y = 0)) %>%
-  summarize(con_prop = n.y/n.x) %>%
-  mutate(group = c(rep("1", 23), rep("2", 23)))
-
-w_poly <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
-  geom_point() +
-  geom_vline(xintercept = 1947) + 
-  geom_smooth(se = FALSE, method = "loess") +
-  labs(title = "female",
-       x = "Cohort (year at age 14)",
-       y = " ") +
-  theme(legend.position = "none")
-
-w_linear <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
-  geom_point() +
-  geom_vline(xintercept = 1947) + 
-  geom_smooth(se = FALSE, method = "lm") +
-  labs(title = "female",
-       x = "Cohort (year at age 14)",
-       y = " ") +
-  theme(legend.position = "none")
-
-
-```
-
-
-```{r men graphs}
-
-m <- table %>%
-  select(yearat14, con, male) %>%
-  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
-  filter(male == 1)
-
-m_num_per_year <- m %>%
-  group_by(yearat14) %>%
-  count()
-
-m_num_con_per_year <- m %>%
-  group_by(yearat14) %>%
-  count(con) %>%
-  filter(con == 1)
-
-m_con_props <- left_join(m_num_per_year, m_num_con_per_year, by = "yearat14") %>%
-  replace_na(list(con = 0, n.y = 0)) %>%
-  summarize(con_prop = n.y/n.x) %>%
-  mutate(group = c(rep("1", 23), rep("2", 23)))
-
-m_poly <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
-  geom_point() +
-  geom_vline(xintercept = 1947) + 
-  geom_smooth(se = FALSE, method = "loess") +
-  labs(title = "male",
-       x = "Cohort (year at age 14)",
-       y = "Proportion Voting Conservative") +
-  theme(legend.position = "none")
-
-m_linear <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
-  geom_point() +
-  geom_vline(xintercept = 1947) + 
-  geom_smooth(se = FALSE, method = "lm") +
-  labs(title = "male",
-       x = "Cohort (year at age 14)",
-       y = "Proportion Voting Conservative") +
-  theme(legend.position = "none")
-
-
-```
-
-
-```{r combined plots}
-
-combine_plots(m_poly, 
-              w_poly,
-              labels = c("(a)", "(b)"),
-              label_size = 12,
-              hjust = -1.5,
-              vjust = 1.7,
-              title.text = "Differing Conservative Vote Share in Men and Women Before and After 1947",
-              title.size = 12,
-              sub.text = "The change in proportion of individuals in each class voting conservative around \nthe implementation of the British school-leaving age reform in 1947, subset by \n gender. Curves represent fourth order polynomial fits on either side of the 1947 \ndiscontinuity in (a), as was done in Marshall (2015).")
-
-combine_plots(m_linear, 
-              w_linear,
-              labels = c("(a)", "(b)"),
-              label_size = 12,
-              hjust = -1.5,
-              vjust = 1.7,
-              title.text = "Linear Fit of Conservative Vote Share Around 1947",
-              sub.text = "The change in proportion of individuals in each class voting conservative around \nthe implementation of the British school-leaving age reform in 1947, subset by \n gender. Curves represent linear fits on either side of the 1947 discontinuity \nas reccomended by Gelman (2015).")
-
-```
-
 
 
 
