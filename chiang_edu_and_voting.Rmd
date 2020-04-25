@@ -1,7 +1,7 @@
 ---
 title: "Gender, Education, and Voting Conservative"
 author: "Molly Chiang"
-date: "4/18/2020"
+date: "4/25/2020"
 output: bookdown::pdf_document2
 bibliography: bib.bib
 ---
@@ -14,24 +14,28 @@ library(rdrobust)
 library(gt)
 library(tidyverse)
 
-load("raw-data/UK Election Data Replication.RData")
+load("Marshall2015_Original/raw-data/UK Election Data Replication.RData")
 
 ```
 
 ## Abstract
 
-Marshall (2015) shows the causal effect of additional years of schooling on voting conservative in his analysis of voting records before and after the British 1947 school-leaving age reform. I successfully replicated Marshall's code, except an update in the rdrobust package lead to slightly different coefficients. In an extension of Marshall's work I investigated how his observed effect differed between genders. Running rdrobust and creating regression discontinuity figures on male and female subsets of the data revealed the effect of more years of education increasing likelihood of voting conservative was much stronger in women than men. This finding could complicate Marshall's argument that more education leads to higher income and then to more conservative political opinions and perhaps reveals something about the differing effect of education on men and women. 
+Marshall (2015) shows the causal effect of additional years of schooling on voting conservative in his analysis of voting records before and after the British 1947 school-leaving age reform. I successfully replicated Marshall's code, except an update in the rdrobust package lead to slightly different coefficients. In an extension of Marshall's work I investigated treatment effect heterogenity between genders. Running rdrobust and creating regression discontinuity figures on male and female subsets of the data revealed Marshall's effect of more years of education increasing likelihood of voting conservative was much stronger in women than men. This finding could complicate Marshall's argument that more education leads to higher income then to more conservative political opinions and perhaps reveals something about the differing effect of education on men and women. 
 
 
-## Introduction and Conclusion
 
-This paper by John Marshall uses data from the results of the 1947 high school leaving age reform in Great Britain, to analyze how additional years in high school affect political preferences [@main]. This paper looked specifically in how additional years in high school effected voting for the Conservative Party [@main]. In 1947, Great Britain changed the high school leaving age from 14 to 15, this induced almost half the student population to stay in school for at least 1 or 2 more years [@main]. Data from the 10 British elections between 1947 and 2010 was then used to compare voters young enough to have been effected by the reform to those who were too old to have been effected, using regression discontinuity [@main]. Regression discontinuity is usually used for determining if a program/treatment is effective, and essentially is is a pretest-posttest program-comparison group design strategy [@regression-discont]. Regression discontinuity is unique in that individuals are assigned to one of two groups, just based on if they are on either side of a pre-determined cut-off [@regression-discont].The results of data analysis revealed staying in high school for longer substantially increased likelihood to vote for the Conservative Party (staying one extra year increased probailitiy of voting Conservative by almost 12 percentage points) [@main]. This supports the previously studied fact that high school is extremely pertinent to political opinions later in life, and that more education generally leads to higher income and thus voting more conservative [@dev],[@meltz]. In addition, this significant finding indicates the education reform of 1947 may have had an even greater affect on politics and election results nationwide over many years than ever expected [@main]. 
+## Introduction
 
-The first aspect of this project was a replication of Marshall's results. His code and data are publically available on the [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YJMGPP). In order to replication Marshall's results, I ran his original code--with a few modifications--in stata. Marshall's figures were able to be replicated by running stata code, but replicating the tables was met with some difficulty. First, the rdrobust package has been updated since 2015 and thus some of the arguments Marshall used have since been deprecated [@deprecated]. I was able to replace old arguments with their 'updated' versions, according to an update from the package authors in 2017 [@deprecated]. Changing this argument allowed the code to be run, but changed the values of the calculated coefficients by a bit. In addition, the code to go from raw output to polished table was not included in the replication code on the Dataverse, so I worked with Gov1006 Teaching Assistant Alice Xu to hard code the replication for table 1 (the main results table). All code for the replication is available in my github repo.^[[Link to Github Repo](https://github.com/mollyechiang/1006_milestone_5)].
+Marshall (2015) uses data from the results of the 1947 high school leaving age reform in Great Britain, to analyze how additional years in high school affect political preferences [@main]. This paper looked specifically in how additional years in high school effected voting for the Conservative Party [@main]. In 1947, Great Britain changed the high school leaving age from 14 to 15, this induced almost half the student population to stay in school for at least 1 or 2 more years [@main]. Data from the 10 British elections between 1947 and 2010 was then used to compare voters young enough to have been effected by the reform to those who were too old to have been effected, using regression discontinuity [@main]. Regression discontinuity is usually used for determining if a program/treatment is effective, and essentially is is a pretest-posttest program-comparison group design strategy [@regression-discont]. Regression discontinuity is unique in that individuals are assigned to one of two groups, just based on if they are on either side of a pre-determined cut-off [@regression-discont].The results of data analysis revealed staying in high school for longer substantially increased likelihood to vote for the Conservative Party (staying one extra year increased probailitiy of voting Conservative by almost 12 percentage points) [@main]. Marshall does further analysis to support a hypothesis where increased education leads to increased income which leads to voting more conservatively [@main]. This supports the previously studied fact that high school is extremely pertinent to political opinions later in life, and that more education generally leads to higher income and thus voting more conservative [@dev],[@meltz]. In addition, this significant finding indicates the education reform of 1947 may have had an even greater affect on politics and election results nationwide over many years than ever expected [@main]. 
 
-After replication, my extension of Marshall's findings look at the effect of his findings when broken down by gender. In order to perform this analysis, I subsetted Marshall's data into a solely male and solely female.
+The first aspect of this project was a replication of Marshall's results. His code and data are publically available on the [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YJMGPP). In order to replication Marshall's results, I ran his original code--with a few modifications--in stata. Marshall's figures were able to be replicated by running stata code, but replicating the tables was met with some difficulty. First, the rdrobust package has been updated since 2015 and thus some of the arguments Marshall used have since been deprecated [@deprecated]. I was able to replace old arguments with their 'updated' versions, according to an update from the package authors in 2017 [@deprecated]. Changing this argument allowed the code to be run, but changed the values of the calculated coefficients by a bit. In addition, the code to go from raw output to polished table was not included in the replication code on the Dataverse, so I just analyzed the raw output I was able to replicate. All code for the replication is available in my github repo^[[Link to Github Repo](https://github.com/mollyechiang/1006_milestone_5)].
 
-Over the course of this paper, I will contextualize Marshall's 2015 paper in a literature review, dive more deeply into explaining my replication process, and show the results from my extension. The tables and figures I replicated from Marshall's paper are also included at the end of the paper.
+After replication, my extension of Marshall's findings look at the effect of his findings when broken down by gender. In order to perform this treatment effect heterogenity analysis, I subsetted Marshall's data into a solely male and solely female. With this breakdown ofthe data, I created regression discontinuty figures and ran rdrobust() just as Marshall had with the entire data set.
+
+The results of the figures and table with rdrobust() outputs revealed the effect of more years of education increasing probabiliy of voting conservative was much stronger in women than men. Overall, students effected by the reform are 4.5 percentage points more likely to vote conservative. However, males of this group are 3.9 percentage points and females 5.3 percentage points more likely to vote conservative. These results do not fit perfectly with Marshall's argument that more education leads to higher income and then to more conservative political opinions, as his analysis is focused in the 1940's, when women (even educated) had little space for economic advancement. This extension thus evidently creates many more questions for investifation on the intersection of  gender, education, and political views.
+
+Over the course of this paper, I will contextualize Marshall's 2015 paper in a literature review, and dive more deeply into explaining my replication process and extension process. 
+
 
 
 ## Literature Review
@@ -43,13 +47,162 @@ On the other hand, Devereux and Hart showed in 2010--using similar data and the 
 However, Marshall's paper was the first to directly address the causal effects of voting conservative and more years of education. This paper also used these past findings about the effect of education to help exaplin Marshall's findings.
 
 
+
 ## Replication Process
 
-I was able to replicate all of the figures in the paper in stata. The code I ran and the output figures are included in the appendix. In terms of the tables, I was able to run all of the code in stata almost directly from Marshall's replication code. Some aspects I had to change because some of the functions he used have been updated since he wrote the paper, namely, when using rdrobust, the bwselect option IK and the h() argument are no longer functional, and have been replaced with an updated version bwselect(mserd), which I used in all the code. This modification was necessary because of the changes that have been made to the rdrobust package since 2015, and did change my values a bit from Marshall's. 
+I was able to replicate all of the figures in stata (see appendix for this process). In addition, I replicated Marshall's figure 3 (his main finding) in R. 
+
+In terms of the tables, I was able to run all of the code in stata almost directly from Marshall's replication code. Some aspects I had to change because some of the functions he used have been updated since he wrote the paper. Namely, when using rdrobust, the bwselect option IK and the h() argument are no longer functional, and have been replaced with an updated version bwselect(mserd), which I used in all the code. This modification was necessary because of the changes that have been made to the rdrobust package since 2015, and did change my values a bit from Marshall's. 
 
 Although I was able to replicate the values of Marshall's tables by running his stata file (with modifications), I was unable to go from the raw results of the models Marshall ran to the polished tables I saw in his paper, as only code for the models were included in his .do file. The summary statistics for all of the tables (number of observations, outcome mean, etc) were replicated perfectly. However, switching the bandwidth selection did result in changes to the results of the rdrobust functions. Some values differed more than others from Marshall's values after changing to bwselect(mserd), but it seems when fuzzy regression discontinuity was run, the values differed less.
- 
+
+Finally, I focused on replicating Marshall's main figures and tables, and did not replicate all of his thorough robustness and continuity checks. For example, Marshall ran the McCrary test for continuity, ran his rdrobust commands with different order polynomials and did placebo cutoff checks, all of which I accepted to be successful and support his data.
+
 This paper relies heavily on rdrobust models, and the reference material for learning about this function and its package is from [@rdrobust].
+
+
+
+## Extension
+
+Marshall (2015) proved that education attainment significantly increased after the 1947 school-leaving age reform in Great Britain. He deomstrated, using this reform and regression discontinuity design, that as years of schooling increased, so did one's likelihood to vote conservative, also ensuring other covariatives maintained continuity around this cutoff. His explanation for this finding was that increased schooling leads to higher income and then more conservative voting based on economic policies. In my extension of his work, I examined treatment effect heterogenity, specifiacllt how Marshall's results differed when subsetting his data for males and females. 
+
+Creating regression discontinuity figures on just the male and female subsets of the data revealed the effect of more years of education increasing probabiliy of voting conservative was much stronger in women than men. In addition, when running rdrobust, the coefficient for the female subset was considerably higher than the coefficient of the male subset (with the both gender coeffecient being intermediate). 
+
+The RDD I ran for the extension was based on what Marshall (2015) ran. I set my dependent variable to con (0 or 1 for if the individual voted conservative) and the independent variable to yearat14 (yearat14 of 1947 is the first class of individuals who were forced to stay in school an extra year). I set the cutoff to the year of the reform, 1947, and like Marshall, set the order of the point-estimator local-polynomial to 1, the order of the bias-correction local-polynomial to 2, and the kernal function to triangular. Finally, differing from Marshall, I set bwselect = "mserd," as that is the updated version of the now-deprecated bwselect(IK). The table with the results of these regression contains the standard-form coefficients and their associated standard error and p-values.
+
+```{r rdrobust}
+
+model1 <- rdrobust(table$con, table$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
+
+female <- table %>%
+  filter(male == 0)
+
+male <- table %>%
+  filter(male == 1)
+
+malemodel <- rdrobust(male$con, male$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
+
+femalemodel <- rdrobust(female$con, female$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
+
+```
+
+```{r table, results = "asis"}
+
+results_table <- data.frame(row = c("Estimated Effect of 1947 Reform", "Standard Error", "p-value", "Number of Observations"),
+                    all = c(as.data.frame(model1["coef"])[1,1], 
+                            as.data.frame(model1["se"])[1,1],
+                            as.data.frame(model1["pv"])[1,1],
+                            29396), 
+                    male = c(as.data.frame(malemodel["coef"])[1,1],
+                             as.data.frame(malemodel["se"])[1,1],
+                             as.data.frame(malemodel["pv"])[1,1],
+                             13745),
+                    female = c(as.data.frame(femalemodel["coef"])[1,1],
+                               as.data.frame(femalemodel["se"])[1,1],
+                               as.data.frame(femalemodel["pv"])[1,1],
+                               15661))
+
+results_table %>%
+  gt() %>%
+  cols_label(all = "All-Gender",
+             male = "Male",
+             female = "Female", 
+             row = " ") %>%
+  tab_header(title = "Gender Breakdown of Schooling's Effect on Voting Conservative",
+             subtitle = "Results of regression discontinuity analysis of a conservative vote around the 1947 school-leaving age reform in Great Britain") %>%
+  fmt_number(columns = 2:4, rows = 1:3, decimals = 3) 
+
+```
+
+The coefficient when running RDD is an indicator of causailty of the forcing variable (in our case, year when the individual was 14 - if you were 14 in 1947 you would have been affected by this program) on the observed variable (voting conservative) around the cutoff point (1947). Thus demonstrating years in school causes more conservative voting patterns in females more than it does in men. Thus, overall, students effected by the reform are 4.5 percentage points more likely to vote conservative. However, males of this group are 3.9 percentage points and females 5.3 percentage points more likely to vote conservative. Although neither of the male or female coefficients had a p-value less than .05 (traditionally indicating statistical significance), accepting uncertainty in our model and analyzing the magnitude of these p-values, we see the female coefficient p-value is an order of magnitude smaller, indicating the effect on females is more significant than on males.
+
+The results of this extension complicate Marshall's argument that more education leads to higher income and then to more conservative political opinions. Women did not have a lot of space for income advancement in the 1940s and 50s in comparision to men, and thus Marshall's explanation would likely assume women would thus have a smaller increase in voting conservative in response to more education, but this extension shows the opposite.
+
+In addition, this extension perhaps reveals something about the differing effect of education on men and women. Are women's political views more responsive to education? Women are generally more liberal then men, how does this result fit into this narrative? This extension certainly opens space for much more investigation on gender, education, and political views.
+
+
+```{r women graph}
+
+w <- table %>%
+  select(yearat14, con, male) %>%
+  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
+  filter(male == 0)
+
+num_per_year <- w %>%
+  group_by(yearat14) %>%
+  count()
+
+num_con_per_year <- w %>%
+  group_by(yearat14) %>%
+  count(con) %>%
+  filter(con == 1)
+
+con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
+  replace_na(list(con = 0, n.y = 0)) %>%
+  summarize(con_prop = n.y/n.x) %>%
+  mutate(group = c(rep("1", 23), rep("2", 23)))
+
+ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(title = "Conservative Vote Share in Females Before and After 1947",
+       subtitle = "Proportion of each class voting conservative by cohort",
+       x = "Cohort (year at age 14)",
+       y = "Proportion of Cohort Voting Conservative",
+       caption = "Figure 1: Illustrates the change in proportion of females in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust = 0))
+
+```
+
+```{r men graph}
+
+m <- table %>%
+  select(yearat14, con, male) %>%
+  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
+  filter(male == 1)
+
+num_per_year <- m %>%
+  group_by(yearat14) %>%
+  count()
+
+num_con_per_year <- m %>%
+  group_by(yearat14) %>%
+  count(con) %>%
+  filter(con == 1)
+
+con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
+  replace_na(list(con = 0, n.y = 0)) %>%
+  summarize(con_prop = n.y/n.x) %>%
+  mutate(group = c(rep("1", 23), rep("2", 23)))
+
+ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(title = "Conservative Vote Share in Men Before and After 1947",
+       subtitle = "Proportion of each class voting conservative by cohort",
+       x = "Cohort (year at age 14)",
+       y = "Proportion of Cohort Voting Conservative",
+       caption = "Figure 2: Illustrates the change in proportion of males in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust = 0))
+
+
+```
+
+
+## Conclusion 
+
+- quick review of Marshall again (and literature on edu --> income --> conservative)
+- quick review of replication again
+- quick review of main points of extension 
+    - mention geldman
+- final point on why extension matters
+
+
+## Appendix
 
 ```{r data for graphic}
 
@@ -147,144 +300,6 @@ ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) +
 ![Marshall Continuity Tests (Figure 2) Replicated in Stata](Tables_and_Figures/Figure2.png)
 
 ![Marshall Years of Schooling and Voting Conservativue (Figure 3) Replicated in Stata](Tables_and_Figures/Figure3.png)
-
-
-## Extension
-
-Marshall proved to us in "Education and Voting Conservative: Evidence from a Major Schooling Reform in Great Britain," that education attainment significantly increased after the 1847 school-leaving age reform in Great Britain. He deomstrated, using this reform and regression discontinuity design, that as years of schooling increased, so did one's likelihood to vote conservative, also ensuring other covariatives maintained continuity around this cutoff. In my extension of his work, I investigated how Marshall's results differed when subsetting his data for males and females. 
-
-Creating regression discontinuity figures on just the male and female subsets of the data revealed the effect of more years of education increasing probabiliy of voting conservative was much stronger in women than men. In addition, when running rdrobust, the coefficient for the female subset was considerably higher than the coefficient of the male subset (with the both gender coeffecient being intermediate). 
-
-The RDD I ran for the extension was based on what Marshall (2015) ran. I set my dependent variable to con (0 or 1 for if the individual voted conservative) and the independent variable to yearat14 (yearat14 of 1947 is the first class of individuals who were forced to stay in school an extra year). I set the cutoff to the year of the reform, 1947, and like Marshall, set the order of the point-estimator local-polynomial to 1, the order of the bias-correction local-polynomial to 2, and the kernal function to triangular. Finally, differing from Marshall, I set bwselect = "mserd," as that is the updated version of the now-deprecated bwselect(IK). The table with the results of these regression contains the standard-form coefficients and their associated standard error and p-values.
-
-```{r rdrobust}
-
-model1 <- rdrobust(table$con, table$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
-
-#modelfuzzy <- rdrobust(table$con, table$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off", fuzzy = table$leave)
-#- I used fuzzy(leave) for all - as fuzzy is used in instances where the assignment is not 100% yes or no - like in this case the government changed the law but it was not perfectly followed or enforced.
-
-female <- table %>%
-  filter(male == 0)
-
-male <- table %>%
-  filter(male == 1)
-
-malemodel <- rdrobust(male$con, male$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
-
-femalemodel <- rdrobust(female$con, female$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
-
-```
-
-```{r table, results = "asis"}
-
-results_table <- data.frame(row = c("Estimated Effect of 1947 Reform", "Standard Error", "p-value", "Number of Observations"),
-                    all = c(as.data.frame(model1["coef"])[1,1], 
-                            as.data.frame(model1["se"])[1,1],
-                            as.data.frame(model1["pv"])[1,1],
-                            29396), 
-                    male = c(as.data.frame(malemodel["coef"])[1,1],
-                             as.data.frame(malemodel["se"])[1,1],
-                             as.data.frame(malemodel["pv"])[1,1],
-                             13745),
-                    female = c(as.data.frame(femalemodel["coef"])[1,1],
-                               as.data.frame(femalemodel["se"])[1,1],
-                               as.data.frame(femalemodel["pv"])[1,1],
-                               15661))
-
-results_table %>%
-  gt() %>%
-  cols_label(all = "All-Gender",
-             male = "Male",
-             female = "Female", 
-             row = " ") %>%
-  tab_header(title = "Gender Breakdown of Schooling's Effect on Voting Conservative",
-             subtitle = "Results of regression discontinuity analysis of a conservative vote around the 1947 school-leaving age reform in Great Britain") %>%
-  fmt_number(columns = 2:4, rows = 1:3, decimals = 3) 
-
-```
-
-The coefficient when running RDD is an indicator of causailty of the forcing variable (in our case, years in school) on the observed variable (voting conservative) around the cutoff point (1947). Thus demonstrating years in school causes more conservative voting patterns in females more than it does in men. Thus, overall, students effected by the reform are 4.5 percentage points more likely to vote conservative. However, males of this group are 3.9 percentage points and females 5.3 percentage points more likely to vote conservative. Although neither of the male or female coefficients had a p-value less than .05 (traditionally indicating statistical significance), accepting uncertainty in our model and analyzing the magnitude of these p-values, we see the female coefficient p-value is an order of magnitude smaller, indicating the effect on females is more significant than on males.
-
-The results of this extension complicate Marshall's argument that more education leads to higher income and then to more conservative political opinions. Women did not have a lot of space for income advancement in the 1940s and 50s in comparision to men, and thus Marshall's explanation would likely assume women would thus have a smaller increase in voting conservative in response to more education, but this extension shows the opposite.
-
-In addition, this extension perhaps reveals something about the differing effect of education on men and women. Are women's political views more responsive to education? Women are generally more liberal then men, how does this result fit into this narrative? This extension certainly opens space for much more investigation on gender, education, and political views.
-
-
-```{r women graph}
-
-w <- table %>%
-  select(yearat14, con, male) %>%
-  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
-  filter(male == 0)
-
-num_per_year <- w %>%
-  group_by(yearat14) %>%
-  count()
-
-num_con_per_year <- w %>%
-  group_by(yearat14) %>%
-  count(con) %>%
-  filter(con == 1)
-
-con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
-  replace_na(list(con = 0, n.y = 0)) %>%
-  summarize(con_prop = n.y/n.x) %>%
-  mutate(group = c(rep("1", 23), rep("2", 23)))
-
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
-  geom_point() +
-  geom_vline(xintercept = 1947) + 
-  geom_smooth(se = FALSE, method = "loess") +
-  labs(title = "Conservative Vote Share in Females Before and After 1947",
-       subtitle = "Proportion of each class voting conservative by cohort",
-       x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 1: Illustrates the change in proportion of females in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
-
-```
-
-```{r men graph}
-
-m <- table %>%
-  select(yearat14, con, male) %>%
-  filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
-  filter(male == 1)
-
-num_per_year <- m %>%
-  group_by(yearat14) %>%
-  count()
-
-num_con_per_year <- m %>%
-  group_by(yearat14) %>%
-  count(con) %>%
-  filter(con == 1)
-
-con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
-  replace_na(list(con = 0, n.y = 0)) %>%
-  summarize(con_prop = n.y/n.x) %>%
-  mutate(group = c(rep("1", 23), rep("2", 23)))
-
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
-  geom_point() +
-  geom_vline(xintercept = 1947) + 
-  geom_smooth(se = FALSE, method = "loess") +
-  labs(title = "Conservative Vote Share in Men Before and After 1947",
-       subtitle = "Proportion of each class voting conservative by cohort",
-       x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 2: Illustrates the change in proportion of males in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
-
-
-```
-
-
-
-## Appendix
 
 
 
