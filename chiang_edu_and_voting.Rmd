@@ -284,27 +284,9 @@ ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) +
 
 
 
-## Appendix (Code)
+## Appendix
 
-<p>
-![Marshall Figure 1 code](Code/figure1_code.png)
-</p>
 
-<p>
-![Marshall Figure 2 code](Code/figure2_code.png)
-</p>
-
-<p>
-![Marshall Figure 3 code](Code/figure3_code.png)
-</p>
-
-<p>
-![Marshall Table 1 Code](Code/table1_code.png)
-</p>
-
-<p>
-![Marshall Table 2 Code](Code/table2_code.png)
-</p>
 
 \newpage 
 
