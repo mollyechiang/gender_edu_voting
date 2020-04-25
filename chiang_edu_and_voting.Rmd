@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = FALSE)
 library(bookdown)
 library(rdrobust)
 library(gt)
+library(cowplot)
+library(ggstatsplot)
 library(tidyverse)
 
 load("Marshall2015_Original/raw-data/UK Election Data Replication.RData")
@@ -68,6 +70,8 @@ Marshall (2015) proved that education attainment significantly increased after t
 
 Creating regression discontinuity figures on just the male and female subsets of the data revealed the effect of more years of education increasing probabiliy of voting conservative was much stronger in women than men. In addition, when running rdrobust, the coefficient for the female subset was considerably higher than the coefficient of the male subset (with the both gender coeffecient being intermediate). 
 
+In addition to creating regression discontinuity figures, 
+
 The RDD I ran for the extension was based on what Marshall (2015) ran. I set my dependent variable to con (0 or 1 for if the individual voted conservative) and the independent variable to yearat14 (yearat14 of 1947 is the first class of individuals who were forced to stay in school an extra year). I set the cutoff to the year of the reform, 1947, and like Marshall, set the order of the point-estimator local-polynomial to 1, the order of the bias-correction local-polynomial to 2, and the kernal function to triangular. Finally, differing from Marshall, I set bwselect = "mserd," as that is the updated version of the now-deprecated bwselect(IK). The table with the results of these regression contains the standard-form coefficients and their associated standard error and p-values.
 
 ```{r rdrobust}
@@ -121,100 +125,116 @@ The results of this extension complicate Marshall's argument that more education
 In addition, this extension perhaps reveals something about the differing effect of education on men and women. Are women's political views more responsive to education? Women are generally more liberal then men, how does this result fit into this narrative? This extension certainly opens space for much more investigation on gender, education, and political views.
 
 
-```{r women graph}
+```{r women graphs}
 
 w <- table %>%
   select(yearat14, con, male) %>%
   filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
   filter(male == 0)
 
-num_per_year <- w %>%
+w_num_per_year <- w %>%
   group_by(yearat14) %>%
   count()
 
-num_con_per_year <- w %>%
+w_num_con_per_year <- w %>%
   group_by(yearat14) %>%
   count(con) %>%
   filter(con == 1)
 
-con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
+w_con_props <- left_join(w_num_per_year, w_num_con_per_year, by = "yearat14") %>%
   replace_na(list(con = 0, n.y = 0)) %>%
   summarize(con_prop = n.y/n.x) %>%
   mutate(group = c(rep("1", 23), rep("2", 23)))
 
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+w_poly <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
   geom_vline(xintercept = 1947) + 
   geom_smooth(se = FALSE, method = "loess") +
-  labs(title = "Conservative Vote Share in Females Before and After 1947",
-       subtitle = "Proportion of each class voting conservative by cohort",
+  labs(title = "female",
        x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 1: Illustrates the change in proportion of females in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
+       y = " ") +
+  theme(legend.position = "none")
 
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+w_linear <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
   geom_vline(xintercept = 1947) + 
   geom_smooth(se = FALSE, method = "lm") +
-  labs(title = "Conservative Vote Share in Females Before and After 1947",
-       subtitle = "Proportion of each class voting conservative by cohort",
+  labs(title = "female",
        x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 1: Illustrates the change in proportion of females in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
+       y = " ") +
+  theme(legend.position = "none")
+
 
 ```
 
-```{r men graph}
+
+```{r men graphs}
 
 m <- table %>%
   select(yearat14, con, male) %>%
   filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
   filter(male == 1)
 
-num_per_year <- m %>%
+m_num_per_year <- m %>%
   group_by(yearat14) %>%
   count()
 
-num_con_per_year <- m %>%
+m_num_con_per_year <- m %>%
   group_by(yearat14) %>%
   count(con) %>%
   filter(con == 1)
 
-con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
+m_con_props <- left_join(m_num_per_year, m_num_con_per_year, by = "yearat14") %>%
   replace_na(list(con = 0, n.y = 0)) %>%
   summarize(con_prop = n.y/n.x) %>%
   mutate(group = c(rep("1", 23), rep("2", 23)))
 
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+m_poly <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
   geom_vline(xintercept = 1947) + 
   geom_smooth(se = FALSE, method = "loess") +
-  labs(title = "Conservative Vote Share in Men Before and After 1947",
-       subtitle = "Proportion of each class voting conservative by cohort",
+  labs(title = "male",
        x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 2: Illustrates the change in proportion of males in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
+       y = "Proportion Voting Conservative") +
+  theme(legend.position = "none")
 
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+m_linear <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
   geom_vline(xintercept = 1947) + 
   geom_smooth(se = FALSE, method = "lm") +
-  labs(title = "Conservative Vote Share in Men Before and After 1947",
-       subtitle = "Proportion of each class voting conservative by cohort",
+  labs(title = "male",
        x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 2: Illustrates the change in proportion of males in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
+       y = "Proportion Voting Conservative") +
+  theme(legend.position = "none")
 
 
 ```
+
+
+```{r combined plots}
+
+combine_plots(m_poly, 
+              w_poly,
+              labels = c("(a)", "(b)"),
+              label_size = 12,
+              hjust = -1.5,
+              vjust = 1.7,
+              title.text = "Differing Conservative Vote Share in Men and Women Before and After 1947",
+              title.size = 12,
+              sub.text = "The change in proportion of individuals in each class voting conservative around \nthe implementation of the British school-leaving age reform in 1947, subset by \n gender. Curves represent fourth order polynomial fits on either side of the 1947 \ndiscontinuity in (a), as was done in Marshall (2015).")
+
+combine_plots(m_linear, 
+              w_linear,
+              labels = c("(a)", "(b)"),
+              label_size = 12,
+              hjust = -1.5,
+              vjust = 1.7,
+              title.text = "Linear Fit of Conservative Vote Share Around 1947",
+              sub.text = "The change in proportion of individuals in each class voting conservative around \nthe implementation of the British school-leaving age reform in 1947, subset by \n gender. Curves represent linear fits on either side of the 1947 discontinuity \nas reccomended by Gelman (2015).")
+
+```
+
+
 
 
 ## Conclusion 
@@ -249,7 +269,7 @@ num_per_year <- x %>%
   group_by(yearat14) %>%
   count()
 
-# then I coundted the number of conservative votes in
+# then I counted the number of conservative votes in
 # that year 
 
 num_con_per_year <- x %>%
@@ -288,7 +308,7 @@ con_props <- left_join(num_per_year, num_con_per_year, by = "yearat14") %>%
 # conservative as the y axis. The points were colored
 # by their group (which side of 1947 they were on)
 
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+poly <- ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
   
   # I added a geom_vline at 1947 so the year would be 
@@ -305,44 +325,31 @@ ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) +
   
   # titles, labels, and caption was then added
   
-  labs(title = "Conservative Vote Share Before and After 1947",
-       subtitle = "A replication of Figure 3 from Marshall 2015 in R",
+  labs(title = "replication in R",
        x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 3: This figure is a replication of Figure 3 (Marshall 2015) in R instead of Stata, it illustrates the jump in \nproportion of a cohort, or class, of British individuals (classified by the year at which they were 14), after the \neducation reform in 1947 which increased the year at which you could legally leave high school from 14 to 15.") +
-  
-  # remove legend and right align caption
-  
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
+       y = "Proportion Voting Conservative") +
+  theme(legend.position = "none")
 
-ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+# process was repeated for a graph with linear fits
+# on either side of 1947
+
+linear <- ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
-  
-  # I added a geom_vline at 1947 so the year would be 
-  # more obvious when looking at the graph
-  
   geom_vline(xintercept = 1947) + 
-  
-  # I added best fit lines to each side of 1947
-  # method was set to loess  to get a polynomial
-  # fit for each group as was done in Figure 3 of
-  # Marshall 2015
-  
   geom_smooth(se = FALSE, method = "lm") +
-  
-  # titles, labels, and caption was then added
-  
-  labs(title = "Conservative Vote Share Before and After 1947",
-       subtitle = "A replication of Figure 3 from Marshall 2015 in R",
+  labs(title = "linear test",
        x = "Cohort (year at age 14)",
-       y = "Proportion of Cohort Voting Conservative",
-       caption = "Figure 3: This figure is a replication of Figure 3 (Marshall 2015) in R instead of Stata, it illustrates the jump in \nproportion of a cohort, or class, of British individuals (classified by the year at which they were 14), after the \neducation reform in 1947 which increased the year at which you could legally leave high school from 14 to 15.") +
-  
-  # remove legend and right align caption
-  
-  theme(legend.position = "none",
-        plot.caption = element_text(hjust = 0))
+       y = " ") +
+      theme(legend.position = "none")
+
+combine_plots(poly, 
+              linear,
+              labels = c("(a)", "(b)"),
+              label_size = 12,
+              hjust = -1.5,
+              vjust = 1.7,
+              title.text = "Marshall (2015) Figure 3 Replication and Linear Test",
+              sub.text = "This figure is a replication of Figure 3 (Marshall 2015) in R instead of Stata, it illustrates the jump in \nproportion of a cohort, or class, of British individuals (classified by the year at which they were 14), after the \neducation reform in 1947 which increased the year at which you could legally leave high school from 14 to 15.")
 
 ```
 
