@@ -1,6 +1,8 @@
 *** Replication code for Marshall, "Education and voting Conservative: Evidence from a major schooling reform in Great Britain"
 
-*** 28th July, 2015
+*** Molly's Version for Gov1006!
+* Only the code I actually ran or attempted the run is included
+* all orignal code (including for appendix figues I didn't replicate) can be found in the repo for this project
 
 
 
@@ -27,32 +29,56 @@ keep if vote_choice_sample==1
 
 
 
-****************************** SOCIAL DESIRABILITY BIAS CHECK
-
-*** Proportion of Conservatives matches true vote share well
-
-di (37.9 * 7.96 + 35.8 * 7.56 + 43.9 * 5.95 + 42.4 * 13.01 + 42.2 * 12.27 + 41.9 * 11.80 + 30.7 * 14.37 + 31.7 * 8.62 + 32.4 * 12.32 + 36.1 * 6.15)/100
-
-
-
-
-****************************** SUMMARY STATISTICS
-
-*** Appendix Table 1: Summary statistics
-summ con lab lib leave min15 year male white black asian fathermanual age birthyear uni nonmanual conpart perm taxspendself welfaretoofar redist gender_not_too_much econ_values crime_rights_scale leave_europe end_priv_edu abortion_too_far raceequ_too_far inform_std_new if yearat14>=1933 & yearat14<=1961
-summ con lab lib leave min15 year male white black asian fathermanual age birthyear uni nonmanual conpart perm taxspendself welfaretoofar redist gender_not_too_much econ_values crime_rights_scale leave_europe end_priv_edu abortion_too_far raceequ_too_far inform_std_new 
-
 
 
 ****************************** GRAPHICAL ANALYSIS
 
+* a new variable caleld weight_14 will be generated for each value of yearat14 and will be equal
+* to the total number of inputs for each of the yearat14 values
+
 bysort yearat14 : g weight_14 = _N
+
+* a new variable called meancon14 will be generated for each set of data points 
+* with one value of yearat14 - and it will be the mean of the of the conservative votes
+* aka-all of the data points with the same yearat14 value will have the same meancon14 value
+* and that value will be the average of the con (whether they voted conservative or not) column
+* for that set of points with the same yearat14 value
+
 bysort yearat14 : egen meancon14 = mean(con)
+
+* just like with meancon14, a new variable called meanconpart14 will be created for each
+* set of yearat14 values. This new variable will be the mean of the conpart column,
+* which contains a 1 or 0 value indicating if the individual is conservative partisan or not
+
 bysort yearat14 : egen meanconpart14 = mean(conpart)
+
+* another variable created for each set of values with the same yearat14
+* this time named meanleave14 and is the average age at which the individuals left school
+* for each set of values with the same yearat14
+
 bysort yearat14 : egen meanleave14 = mean(leave)
+
+* same thing again, this time mean of taxspendself, which is a tax spend scale
+
 bysort yearat14 : egen meantaxspendself14 = mean(taxspendself)
+
+* same process of variable creation, this time for mean of welfaretoofar which is
+* a 0 or1 variable indicating if the individual took welfare too far or not
+
 bysort yearat14 : egen meanwelfaretoofar14 = mean(welfaretoofar)
+
+* again same process, this time mean of redist, which is a redistributed scale of
+* income and wealth from 0 to 4
+
 bysort yearat14 : egen meanredist14 = mean(redist)
+
+* generate a number of columns for students who left at different grades (level 8, 9, 10
+* 11, 12) - which will have a 1 if the student was under age 9, 10, 11, 12, 13 years
+* respectively and 0 if they did not (and only if there is a leave age value)
+* then create another column for each of these new columns called meanleave_## which
+* is the mean of the leave_l# column for each value of yearat14
+* this will give us an idea of the number of kids who left at each level of school
+* for each cohort of people who were all 14 at the same time 
 
 g leave_l8 = leave<9 if leave!=.
 by yearat14, sort : egen meanleave_l8 = mean(leave_l8)
@@ -66,9 +92,32 @@ g leave_l12 = leave<13 if leave!=.
 by yearat14, sort : egen meanleave_l12 = mean(leave_l12)
 
 *** Figure 1: Trends in school leaving age
+
+* start with twoway function which is stata's way of indicating a graph will come next
+* many different things will be plotted on the same axis each with individual identifier variables
+* to combine all this stuff include each thing in its own set of parenthesis 
+
+* first use lpoly to create a local polynomial smooth plot with leave_18 on the y acis and yearat14
+* on the x axis - however, subset to only include individuals who were 14 between 1925 and 1947
+* add a specefic color, width of the line and degree of the line
+
 twoway (lpoly leave_l8 yearat14 if yearat14<1947 & yearat14>=1925, lcolor(gs14) clwidth(thick) degree(4)) ///
+ 
+ * repeat the same use of lpoly and axis, but this time for individuals who were 14 between 1947 and 1970
+ * add the same specifications for color, width and degree
+ 
   (lpoly leave_l8 yearat14 if yearat14>=1947 & yearat14<=1970, lcolor(gs14) clwidth(thick) degree(4)) ///
+  
+  * now plot the same information from the first lpoly as a scatter plot
+  * with its own weight, size, and color specifications
+  
   (scatter meanleave_l8 yearat14 if yearat14>=1925 & yearat14<=1970 [weight=weight_14], msize(small) mcolor(gs14)) ///
+  
+  * the process of: creating 2 different lpoly plots for those who are 14 before and after 1947
+  * to show the proportion of students leaving school after all the different grades in different years
+  * and then adding a scatterplot of the same data afterwards
+  * will be repeated for leaving level 9, 10, 11, and 12
+  
   (lpoly leave_l9 yearat14 if yearat14<1947 & yearat14>=1925, lcolor(gs11) clwidth(thick) degree(4)) ///
   (lpoly leave_l9 yearat14 if yearat14>=1947 & yearat14<=1970, lcolor(gs11) clwidth(thick) degree(4)) ///
   (scatter meanleave_l9 yearat14 if yearat14>=1925 & yearat14<=1970 [weight=weight_14], msize(small) mcolor(gs11)) ///
@@ -81,12 +130,26 @@ twoway (lpoly leave_l8 yearat14 if yearat14<1947 & yearat14>=1925, lcolor(gs14) 
   (lpoly leave_l12 yearat14 if yearat14<1947 & yearat14>=1925, lcolor(black) clwidth(thick) degree(4)) ///
   (lpoly leave_l12 yearat14 if yearat14>=1947 & yearat14<=1970, lcolor(black) clwidth(thick) degree(4)) ///
   (scatter meanleave_l12 yearat14 if yearat14>=1925 & yearat14<=1970 [weight=weight_14], msize(small) mcolor(black)), ///
+  
+  * add specifications for the graph - background colors, axis labels and titles
+  * add a vertical black line to indicate when 1947 was
+  * add a legend to give labels to the different times to leave school
+  
   graphregion(fcolor(white) lcolor(white)) ylab(,nogrid) ytitle(Proportion leaving) xtitle(Cohort: year aged 14) xline(1946.5, lcolor(black) lpattern(dash)) xlab(1925(5)1970) ///
   legend(nobox region(fcolor(white) margin(zero) lcolor(white)) lab(3 "Leave before 14") lab(6 "Leave before 15") lab(9 "Leave before 16") lab(12 "Leave before 17") lab(15 "Leave before 18") order(3 6 9 12 15) row(1)) 
 
 
 
 *** Figure 3: Reduced form
+
+* use twoway again to create a graphic - and use paranthesis to combine many different aspects
+* on one set of axis
+
+* once again, use two different lpolys - one for people 14 before 1947 and one for after
+* once again add a scatter to this data (for whole time range)
+* add specifications on color and size for all aspects, add axis labels and tables and 
+* rescale the y axis
+
 twoway (lpoly con yearat14 if yearat14>=1925 & yearat14<1947, lcolor(black) clwidth(thick) degree(4)) ///
   (lpoly con yearat14 if yearat14>=1947 & yearat14<=1970, lcolor(black) clwidth(thick) degree(4)) ///
   (scatter meancon14 yearat14 if yearat14>=1925 & yearat14<=1970 [weight=weight_14], msize(small) mcolor(gray)), ///
@@ -94,28 +157,33 @@ twoway (lpoly con yearat14 if yearat14>=1925 & yearat14<1947, lcolor(black) clwi
   yscale(range(.2 .5)) ylabel(.2[0.1]0.5) xlab(1925[5]1970) legend(off) 
     
 
-  
-****************************** CONTINUITY TESTS
-
-*** Appendix Figure 1: McCrary test (need to use McCrary's ado file, available here: http://eml.berkeley.edu/~jmccrary/DCdensity/DCdensity.ado)
-noisily DCdensity yearat14, breakpoint(1947) b(1) h(5) generate(Xj Yj r0 fhat se_fhat)
-drop Xj Yj r0 fhat se_fhat
 
 
-
-*** Frandsen test (need to use Frandsen's "rddisttest" ado file, available here: https://economics.byu.edu/frandsen/Pages/Software.aspx)
-rddisttest yearat14, threshold(1947) discrete
-
-
-
+	
+	
 ******************************* CONTINUITY IN OTHER VARIABLES
 
 *** Figure 2: Continuity graphs
+
+* use capture to suppress the results of the following code and store it 
+* unless the output is 0 (in which nothing will occur)
+* in this case capture is used on another by ... sort: egen which creates a new column called 
+* meanyear which is the mean year for each set of yearat14 values
+* then a scatter plot is created with meanyear on y and yearat14 on x axisfor yearat14 between 1925
+* and 1970 - add specifications. Add labels to the graph
+* save the graph as a graph called g1.gph - replace any old copies of this file if there are any
+
 capture by yearat14, sort : egen meanyear = mean(year)
 twoway (scatter meanyear yearat14 if yearat14>=1925 & yearat14<=1970, mcolor(black) msize(medsmall)), ///
   graphregion(fcolor(white) lcolor(white)) ylab(,nogrid) ytitle(Year) xtitle(Cohort: year aged 14) xline(1946.5, lcolor(black) lpattern(dash)) ///
   legend(off) title(Panel A: Survey year, color(black) size(medium)) xlab(1930[10]1970)
 graph save Graph "g1.gph", replace
+
+* once again use capture. this time make a new column for meanmale (by yearat14 values)
+* create a scatterplot with meanmale on yand yearat14 on x axis (same year range and 
+* specifications of points and graph)
+* save graph and replace old files
+* repeat this process for all of the variables we are testing the continuity of 
 
 capture by yearat14, sort : egen meanmale = mean(male)
 twoway (scatter meanmale yearat14 if yearat14>=1925 & yearat14<=1970, mcolor(black) msize(medsmall)), ///
@@ -158,37 +226,80 @@ twoway (scatter average_earnings yearat14 if yearat14>=1925 & yearat14<=1970, mc
   legend(off) title(Panel H: National average earnings, color(black) size(medium)) xlab(1930[10]1970)
 graph save Graph "g8.gph", replace
 
+ * use gr to combin the 3 graphs into one panel with 3 rows and three columns
+
 gr combine "g1" "g2" "g3" "g4" "g5" "g6" "g7" "g8", rows(3) cols(3) subtitle(, color(black) fcolor(white) lcolor(white)) graphregion(fcolor(white) lcolor(white) ifcolor(white) ilcolor(white))
 
 
 
-*** Appendix Table 2: Continuity tests
-rdrobust year yearat14, c(1947) p(1) q(2) kernel(tri) h(14.736)
-rdrobust male yearat14, c(1947) p(1) q(2) kernel(tri) h(14.736)
-rdrobust white yearat14, c(1947) p(1) q(2) kernel(tri) h(14.736)
-rdrobust black yearat14, c(1947) p(1) q(2) kernel(tri) h(14.736)
-rdrobust asian yearat14, c(1947) p(1) q(2) kernel(tri) h(14.736)
-rdrobust fathermanual yearat14, c(1947) p(1) q(2) kernel(tri) h(14.736)
 
-* Note: throughout I use the conventional standard robust standard errors reported by the rdrobust command
+
 
 
 
 ****************************** LOCAL LINEAR REGRESSION ANALYSIS
 
-******* MOLLY - set all h and bwselect(IK) to bwselect(mserd) to reflect new use of rdrobust
+******* MOLLY - set all h and bwselect(IK) to bwselect(mserd) to reflect new use of rdrobust 
+		* IK and h are now deprecated
+* this table shows estimates on the 1947's affect on different variables (measure effect of a program).
+* rdrobust will be used again to compare local linear regressions on either side of
+* a cutoff (1947)
+
+* A number of variables are input as the dependent variable, while yearat14 is the
+* independent for all of them, c indicates the RD cut off - which in this case is 
+* the year 1947, p indicates the order of the local polynomial for the
+* points (1 was chosen indicating local linear regression), q indicates
+* the order of the local polynomial for bias correction (2 was chosen
+* indicating local quadratic regression), the kernel function indicates
+* the mathematical method used to construct the local polynomials, in this
+* case they chose tri (which is the default method)
+* h is the old bandwidth used to construct the RD point estimator (14.736 was
+* used originally (from Imbens and Kalyanaraman (2012)) but as I said it was changed
+
 
 *** Table 1: Main estimates
+
+* first use rdrobust on leave (year left school) and yearat14
+* this should show how much a trend in the variable changed after 1947 
+* (and the associated measures of standard error)
+* hen sum the leave variable if the individuals were 14 between 1933 and 1961
+
 rdrobust leave yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
 sum leave if yearat14>=1933 & yearat14<=1961
+
+* repeat the same process for uni instead of leave - giving us
+* how much more/less people started going to university before and after
+* 1947 (uni is a 0 or 1 variable for if you went) and associated error terms
+* again after running rdrobust, sum uni values if yearat14 is between 1933 and 1961
+
 rdrobust uni yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
 sum uni if yearat14>=1933 & yearat14<=1961
+
+* now run rdrobust on our con variable (whether or not someone voted conservative) and yearat14
+* use same cutoff and p, q, and kernel specifications
+* bwselect was changed here from IK to mserd
+
 rdrobust con yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
+
+* run rdrobust on con again, this time add a fuzzy variable - this specifies leave (leave when left 
+* school) as the treatment status variable to implement a fuzzy regression discontinuity
+* which is another type of regression discontinuity 
+
 rdrobust con yearat14, c(1947) fuzzy(leave) p(1) q(2) kernel(tri) bwselect(mserd)
 sum leave if yearat14>=1933 & yearat14<=1961
+
+* use areg to fit linear regressions including all the indicated variables
+* while absorbing the specified survey variable - which was the year the survey occured 
+
 areg con leave male white black asian sagesq-sagequart syearat14 syearat14sq syearat14cub syearat14quart, ro a(survey)
 areg con ib9.leave male white black asian sagesq-sagequart syearat14 syearat14sq syearat14cub syearat14quart, ro a(survey)
 summ con if e(sample)
+
+* run rdrobust 2 more times - first between lab (voting for the labour party) and
+* yearat14 (same specifications and use fuzzy(leave) model) and then between lib  (voted for 
+* libertarian party) and yearat14 (fuzzy(leave) model as well)
+* in both cases, sum lib if yearat14 is between 1933 and 1961
+
 rdrobust lab yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd) fuzzy(leave)
 sum lib if yearat14>=1933 & yearat14<=1961
 rdrobust lib yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd) fuzzy(leave)
@@ -196,7 +307,8 @@ sum lib if yearat14>=1933 & yearat14<=1961
 
 
 
-** MOLLY ADDITION TO PRINT TABLE (from Alice)
+** MOLLY ADDITION TO TRY TO PRINT TABLE (from Alice)
+* this addition did not end up working.
 cd "/Users/mollychiang/Desktop/Harvard/Sophomore Year/Semester 2/Gov1006/Marshall_Replication"
 eststo clear
 eststo: rdrobust leave yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
@@ -214,202 +326,45 @@ mtitles("Model") ///
 title("Economic" \label{table1}) style(tex) label append
 
 
-****************************** ROBUSTNESS
-
-*** Figure 4: Different bandwidths and kernels
-foreach t in "" leave {
-foreach k in tri uni {
-foreach h of numlist 2/20 {
-  rdrobust con yearat14, c(1947) p(1) q(2) kernel(`k') h(`h') fuzzy(`t')
-}
-}
-}
-
-* Note: copy these estimates from the above loop into the Stata data editor for graphical presentation
-bandwidth	coef	se	kernel	version
-2	0.03754	0.02491	tri	rf
-3	0.04136	0.05918	tri	rf
-4	0.0514	0.04421	tri	rf
-5	0.04571	0.03726	tri	rf
-6	0.06067	0.03332	tri	rf
-7	0.05625	0.03027	tri	rf
-8	0.05527	0.02797	tri	rf
-9	0.05384	0.02616	tri	rf
-10	0.04974	0.02464	tri	rf
-11	0.04821	0.02342	tri	rf
-12	0.04757	0.02243	tri	rf
-13	0.04632	0.02154	tri	rf
-14	0.04458	0.02071	tri	rf
-15	0.044	0.02001	tri	rf
-16	0.04422	0.0194	tri	rf
-17	0.04473	0.01886	tri	rf
-18	0.04535	0.01836	tri	rf
-19	0.04603	0.01792	tri	rf
-20	0.04629	0.0175	tri	rf
-2	0.10638	0.07248	tri	years
-3	0.1001	0.14867	tri	years
-4	0.1436	0.13504	tri	years
-5	0.1337	0.11731	tri	years
-6	0.15863	0.09722	tri	years
-7	0.14487	0.08527	tri	years
-8	0.13484	0.07362	tri	years
-9	0.12703	0.06588	tri	years
-10	0.11941	0.06252	tri	years
-11	0.11897	0.06105	tri	years
-12	0.11765	0.05849	tri	years
-13	0.11688	0.05723	tri	years
-14	0.11545	0.05636	tri	years
-15	0.11581	0.05534	tri	years
-16	0.11797	0.05451	tri	years
-17	0.12109	0.05396	tri	years
-18	0.12454	0.0535	tri	years
-19	0.12914	0.05364	tri	years
-20	0.13398	0.05437	tri	years
-2	0.04101	0.05905	uni	rf
-3	0.05857	0.04281	uni	rf
-4	0.0444	0.03554	uni	rf
-5	0.07957	0.03167	uni	rf
-6	0.05026	0.02847	uni	rf
-7	0.05198	0.02628	uni	rf
-8	0.04998	0.0245	uni	rf
-9	0.03912	0.023	uni	rf
-10	0.04352	0.02187	uni	rf
-11	0.0451	0.02096	uni	rf
-12	0.0414	0.02006	uni	rf
-13	0.03776	0.01923	uni	rf
-14	0.04149	0.0186	uni	rf
-15	0.0452	0.01804	uni	rf
-16	0.04724	0.01753	uni	rf
-17	0.04872	0.01704	uni	rf
-18	0.05003	0.01664	uni	rf
-19	0.04824	0.01621	uni	rf
-20	0.04896	0.01584	uni	rf
-2	0.09971	0.14903	uni	years
-3	0.16156	0.13263	uni	years
-4	0.12773	0.10899	uni	years
-5	0.18438	0.08534	uni	years
-6	0.12523	0.07542	uni	years
-7	0.11429	0.06073	uni	years
-8	0.10872	0.0555	uni	years
-9	0.09688	0.0587	uni	years
-10	0.11593	0.06117	uni	years
-11	0.11173	0.05431	uni	years
-12	0.11179	0.05648	uni	years
-13	0.10804	0.05709	uni	years
-14	0.11737	0.05517	uni	years
-15	0.12896	0.05473	uni	years
-16	0.13842	0.05523	uni	years
-17	0.14521	0.05524	uni	years
-18	0.16118	0.0597	uni	years
-19	0.17652	0.06758	uni	years
-20	0.18333	0.06838	uni	years
-
-g min95 = coef - 1.96 * se
-g max95 = coef + 1.96 * se
-
-twoway (scatter coef bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="tri" & version=="rf", mcolor(black)) ///
-  (rcap min95 max95 bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="tri" & version=="rf", vertical lcolor(black)), ///
-  legend(off) graphregion(fcolor(white) lcolor(white)) xlab(2(1) 20, valuelabel labsize(small) nogrid) ylab(, nogrid) yline(0, lcolor(black) lpattern(dash)) ///
-  xlab(, labsize(small)) ytitle("", size(small)) title("Effect of 1947 reform (triangle)", color(black) size(medium)) xtitle("Bandwidth")
-graph save Graph "g1.gph", replace
-
-twoway (scatter coef bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="uni" & version=="rf", mcolor(black)) ///
-  (rcap min95 max95 bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="uni" & version=="rf", vertical lcolor(black)), ///
-  legend(off) graphregion(fcolor(white) lcolor(white)) xlab(2(1) 20, valuelabel labsize(small) nogrid) ylab(, nogrid) yline(0, lcolor(black) lpattern(dash)) ///
-  xlab(, labsize(small)) ytitle("", size(small)) title("Effect of 1947 reform (rectangular)", color(black) size(medium)) xtitle("Bandwidth")
-graph save Graph "g2.gph", replace
-
-twoway (scatter coef bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="tri" & version=="years", mcolor(black)) ///
-  (rcap min95 max95 bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="tri" & version=="years", vertical lcolor(black)), ///
-  legend(off) graphregion(fcolor(white) lcolor(white)) xlab(2(1) 20, valuelabel labsize(small) nogrid) ylab(, nogrid) yline(0, lcolor(black) lpattern(dash)) ///
-  xlab(, labsize(small)) ytitle("", size(small)) title("Effect of years of schooling (triangle)", color(black) size(medium)) xtitle("Bandwidth")
-graph save Graph "g3.gph", replace
-
-twoway (scatter coef bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="uni" & version=="years", mcolor(black)) ///
-  (rcap min95 max95 bandwidth if bandwidth>=2 & bandwidth<=20 & kernel=="uni" & version=="years", vertical lcolor(black)), ///
-  legend(off) graphregion(fcolor(white) lcolor(white)) xlab(2(1) 20, valuelabel labsize(small) nogrid) ylab(, nogrid) yline(0, lcolor(black) lpattern(dash)) ///
-  xlab(, labsize(small)) ytitle("", size(small)) title("Effect of years of schooling (rectangular)", color(black) size(medium)) xtitle("Bandwidth")
-graph save Graph "g4.gph", replace
-
-gr combine "g1" "g2" "g3" "g4", rows(2) cols(2) subtitle(, color(black) fcolor(white) lcolor(white)) graphregion(fcolor(white) lcolor(white) ifcolor(white) ilcolor(white))
-  
-drop bandwidth-max95
-
-
-
-*** Appendix Table 3: Higher-order polynomials and CCT bias correction
-rdrobust con yearat14, c(1947) p(2) q(3) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1947) p(3) q(4) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1947) p(2) q(3) kernel(tri) bwselect(IK) fuzzy(leave)
-rdrobust con yearat14, c(1947) p(3) q(4) kernel(tri) bwselect(IK) fuzzy(leave)
-rdrobust con yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(CCT) all
-rdrobust con yearat14, c(1947) fuzzy(leave) p(1) q(2) kernel(tri) bwselect(CCT) all
-
-
-
-*** Appendix Figure 2: Placebo reforms
-rdrobust con yearat14, c(1937) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1938) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1939) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1940) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1941) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1942) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1943) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1944) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1945) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust con yearat14, c(1946) p(1) q(2) kernel(tri) bwselect(IK)
-
-* Note: copy these estimates from the above loop into the Stata data editor for graphical presentation
-placebo	coef	se
-1937	-0.00928	0.0202
-1938	-0.02086	0.02031
-1939	-0.00612	0.02112
-1940	-0.00821	0.02073
-1941	-0.02798	0.02202
-1942	0.00904	0.02146
-1943	-0.03114	0.0233
-1944	0.0055	0.0218
-1945	0.01058	0.02132
-1946	0.02654	0.0211
-
-g min95 = coef - 1.96 * se
-g max95 = coef + 1.96 * se
-
-twoway (scatter coef placebo, mcolor(black)) ///
-  (rcap min95 max95 placebo, vertical lcolor(black)), ///
-  legend(off) graphregion(fcolor(white) lcolor(white)) xlab(1937(1)1946, valuelabel labsize(small) nogrid) ylab(, nogrid) yline(0, lcolor(black) lpattern(dash)) ///
-  xlab(, labsize(small)) ytitle("", size(small)) xtitle("Placebo reform year") ytitle("Effect of placebo reform on Vote Conservative")
-
-  
-
-*** Appendix Table 4: LFS exclusion restriction violations
-
-preserve
-
-use "LFS Data Replication.dta", clear
-
-rdrobust number_dep_child yearat14 , c(1947) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust age_old_dep_child yearat14 , c(1947) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust married_once yearat14 , c(1947) p(1) q(2) kernel(tri) bwselect(IK)
-
-restore
-
-
-
 ****************************** MECHANISMS
 
 *** Table 2: Raising social class, Heterogeneity by age (above 60), Become a Conservative partisan, and Decide before the electoral campaign
+
+* this code creates table two - which aims to investigate if people continue
+* to vote conservative even after they are retired (the implication being that people
+* with more edu had higher incomes and that was why they voted conservative, once people
+* got old and weren't experiencing the results of high incomes, they stopped voting
+* conservative, which was found to be true)
+
+* first see if people under 60 were more likely to be manual workers before and after the reform
+* test this by running two different rdrobusts between nonmanual and yearat14 if age < 60
+* in the first have no fuzzy input, in the second use fuzzy(leave) - for both cutoff is 1947
+* p=1, q=2, kernel = tri and bwselect(IK)
+* sum nonmanual if individuals were under 60 and 14 between 1934 and 1960
+
 rdrobust nonmanual yearat14 if age<60, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
 rdrobust nonmanual yearat14 if age<60, fuzzy(leave) c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
 sum nonmanual if age<60 & yearat14>=1934 & yearat14<=1960
+
+* now run rdrobust on voting con and yearat14 for people under 60
+* same speficifcations and again one time without fuzzy(leave) and one time with
+* sum con if individuals were under 60 and 14 between 1923 and 1969
 
 rdrobust con yearat14 if age<60, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
 rdrobust con yearat14 if age<60, c(1947) p(1) q(2) kernel(tri) bwselect(mserd) fuzzy(leave)
 sum con if age<60 & yearat14>=1923 & yearat14<=1969
 
+* now same process (two rdrobusts one fuzzy one not) for con and yearat14 for those over 60
+* sum con if individuals were over 60 and 14 between 1932 and 1962
+
 rdrobust con yearat14 if age>=60, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
 rdrobust con yearat14 if age>=60, c(1947) p(1) q(2) kernel(tri) bwselect(mserd) fuzzy(leave)
 sum con if age>=60 & yearat14>=1932 & yearat14<=1962
+
+* now just run two rdrobusts on both conpart (whether individual is conservative
+* partisan) and perm (if indiviudal decided how they were voting before campaign)
+* like above, run one rdrobust with fuzzy(leave) and one without
+* sun conpart if 14 between 1934 and 1960, sum perm if 14 between 1935 and 1959
 
 rdrobust conpart yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd)
 rdrobust conpart yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(mserd) fuzzy(leave)
@@ -421,13 +376,23 @@ sum perm if yearat14>=1935 & yearat14<=1959
 
 
 
-*** Footnote 13 reference
-rdrobust conpart yearat14 if age<60, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust conpart yearat14 if age>=60, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
-
-
 
 *** Table 3 Panel A: Economic policy preferences
+
+* table 3 investigates another implication of the data - does more high school education
+* increase support for conservative values in addition to just voting conservative
+* and of conservative values, does more education support conservative economic values or
+* noneconomic values in addition?
+* table 3 panel A investigates feelings toward conservative economic policy
+
+* Marshall investigated 4 conservative economic values: opposition to tax and spend policies, 
+* the belief that welfare spending has gone too far, opposition to income and wealth 
+* redistribution, and opposition to the belief that attempts to give women equal opportunities
+* have not gone far enough - all of these were run in a rdrobust with yearat 14
+* cutoff 1947, p=1, q=2, tri kernel and bwselect(IK)
+* in addition rdrobust was run for econ_values, which was a standardized, composite
+* score indicating the conservative economic preference of an individual
+
 rdrobust taxspendself yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 rdrobust welfaretoofar yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 rdrobust redist yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
@@ -435,6 +400,9 @@ rdrobust gender_not_too_much yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK
 sum gender_not_too_much if yearat14>=1931 & yearat14<=1963
 rdrobust econ_values yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 sum econ_values if yearat14>=1930 & yearat14<=1964
+
+* with the same 4 variables (and the composite econ_values variable) also
+* run a fuzzy rdrobust
 
 rdrobust taxspendself yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fuzzy(leave)
 rdrobust welfaretoofar yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fuzzy(leave)
@@ -445,6 +413,21 @@ rdrobust econ_values yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fuzzy(
 
 
 *** Table 3 Panel B: Non-economic policy preferences
+
+* after finding more edu did increase support for conservative economic policies 
+* (although not always significantly), Marshall investigated if more high school increased
+* support for more social conservative, and some social liberal values in Panel B of table3
+* Marshall found there was no significant support for conservative economic policies or
+* for liberal ones - indicating high school edu doesn't seem to effect either of them
+* and that the increased conservative voting is almost all economically linked
+
+* to do this rdrobust was again used
+* this time foremphasis on reducing crime over protecting citizen right (crime_rights_scale),
+* support for Britain leaving the European community (leave_europe), and opposition to abolishing
+* private education (end private edu)
+* rdrobust was also used for two liberal values of abortion and racial equality
+* all rdrobusts were run with cutoff 1947, p=1, q=2, tri kernel and bwselect(IK)
+
 rdrobust crime_rights_scale yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 rdrobust leave_europe yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 rdrobust end_priv_edu yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
@@ -452,6 +435,8 @@ rdrobust abortion_too_far yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 sum abortion_too_far if yearat14>=1933 & yearat14<=1961
 rdrobust raceequ_too_far yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 sum raceequ_too_far if yearat14>=1927 & yearat14<=1967
+
+* again the process was repeated for a fuzzy rdrobust
 
 rdrobust crime_rights_scale yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fuzzy(leave)
 rdrobust leave_europe yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fuzzy(leave)
@@ -461,14 +446,20 @@ rdrobust raceequ_too_far yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fu
 
 
 
-*** Political engagement alternative explanation
-rdrobust inform_std_new yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
-rdrobust inform_std_new yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fuzzy(leave)
-
 preserve
 use "UK Election Data Replication.dta", clear
+
+* perserve original UK Election data so analysis doesn't affect it
+
+* run two rdrobusts on turnout (total number of people who voted inelections) one fuzzy
+* and one not to see if it changed after 1947
+* sum turnout btwen 1929 and 1965 and then sum turnout overall
+
 rdrobust turnout yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK)
 rdrobust turnout yearat14, c(1947) p(1) q(2) kernel(tri) bwselect(IK) fuzzy(leave)
 sum turnout if yearat14>=1929 & yearat14<=1965
 sum turnout
+
+* restore data to what it had looked like when we called preserve
+
 restore
