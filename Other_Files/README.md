@@ -1,0 +1,5 @@
+# Gender, Education, and Voting Conservative
+
+### A Replication and Extension of "Education and Voting Conservative: Evidence from a Major Schooling Reform in Great Britain" (Marshall 2015)
+
+Marshall (2015) shows the causal effect of additional years of schooling on voting conservative in his analysis of voting records before and after the British 1947 school-leaving age reform. I successfully replicated Marshall's code, except an update in the rdrobust package lead to slightly different coefficients. In an extension of Marshall's work I investigated how his observed effect differed between genders. Running rdrobust and creating regression discontinuity figures on male and female subsets of the data revealed the effect of more years of education increasing likelihood of voting conservative was much stronger in women than men. This finding could complicate Marshall's argument that more education leads to higher income then to more conservative political opinions and perhaps reveals something about the differing effect of education on men and women.
