@@ -154,6 +154,18 @@ ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) +
   theme(legend.position = "none",
         plot.caption = element_text(hjust = 0))
 
+ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "lm") +
+  labs(title = "Conservative Vote Share in Females Before and After 1947",
+       subtitle = "Proportion of each class voting conservative by cohort",
+       x = "Cohort (year at age 14)",
+       y = "Proportion of Cohort Voting Conservative",
+       caption = "Figure 1: Illustrates the change in proportion of females in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust = 0))
+
 ```
 
 ```{r men graph}
@@ -181,6 +193,18 @@ ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) +
   geom_point() +
   geom_vline(xintercept = 1947) + 
   geom_smooth(se = FALSE, method = "loess") +
+  labs(title = "Conservative Vote Share in Men Before and After 1947",
+       subtitle = "Proportion of each class voting conservative by cohort",
+       x = "Cohort (year at age 14)",
+       y = "Proportion of Cohort Voting Conservative",
+       caption = "Figure 2: Illustrates the change in proportion of males in each class voting conservative around the \nimplementation of the school-leaving age reform in 1947. Curves represent fourth order polynomial fits on either \nside of the 1947 discontinuity") +
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust = 0))
+
+ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  geom_vline(xintercept = 1947) + 
+  geom_smooth(se = FALSE, method = "lm") +
   labs(title = "Conservative Vote Share in Men Before and After 1947",
        subtitle = "Proportion of each class voting conservative by cohort",
        x = "Cohort (year at age 14)",
@@ -292,14 +316,42 @@ ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) +
   theme(legend.position = "none",
         plot.caption = element_text(hjust = 0))
 
+ggplot(con_props, aes(x = yearat14, y = con_prop, color = group)) + 
+  geom_point() +
+  
+  # I added a geom_vline at 1947 so the year would be 
+  # more obvious when looking at the graph
+  
+  geom_vline(xintercept = 1947) + 
+  
+  # I added best fit lines to each side of 1947
+  # method was set to loess  to get a polynomial
+  # fit for each group as was done in Figure 3 of
+  # Marshall 2015
+  
+  geom_smooth(se = FALSE, method = "lm") +
+  
+  # titles, labels, and caption was then added
+  
+  labs(title = "Conservative Vote Share Before and After 1947",
+       subtitle = "A replication of Figure 3 from Marshall 2015 in R",
+       x = "Cohort (year at age 14)",
+       y = "Proportion of Cohort Voting Conservative",
+       caption = "Figure 3: This figure is a replication of Figure 3 (Marshall 2015) in R instead of Stata, it illustrates the jump in \nproportion of a cohort, or class, of British individuals (classified by the year at which they were 14), after the \neducation reform in 1947 which increased the year at which you could legally leave high school from 14 to 15.") +
+  
+  # remove legend and right align caption
+  
+  theme(legend.position = "none",
+        plot.caption = element_text(hjust = 0))
+
 ```
 
 
-![Marshall Decrease in Leaving School after 1947 (Figure 1) Replicated in Stata](Tables_and_Figures/Figure1.png)
+![Marshall Decrease in Leaving School after 1947 (Figure 1) Replicated in Stata](Figures/Figure1.png)
 
-![Marshall Continuity Tests (Figure 2) Replicated in Stata](Tables_and_Figures/Figure2.png)
+![Marshall Continuity Tests (Figure 2) Replicated in Stata](Figures/Figure2.png)
 
-![Marshall Years of Schooling and Voting Conservativue (Figure 3) Replicated in Stata](Tables_and_Figures/Figure3.png)
+![Marshall Years of Schooling and Voting Conservativue (Figure 3) Replicated in Stata](Figures/Figure3.png)
 
 
 
