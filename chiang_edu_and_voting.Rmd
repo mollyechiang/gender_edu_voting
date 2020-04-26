@@ -257,7 +257,7 @@ In addition, this extension perhaps reveals something about the differing effect
 
 ## Appendix
 
-I was able to replicate all of Marshall's figures and table code directly in stata. That code is available at this project's [repo](https://github.com/mollyechiang/gender_edu_voting). Here I have a screenshot of Marshall's key figure (Figure 3) that I replicated in stata and a verion in R that I created. In addition, I preformed the linearity test on my replicated figure, as suggested by Gelman (2015).
+I was able to replicate all of Marshall's figures and table code directly in stata. That code is available at this project's [repo](https://github.com/mollyechiang/gender_edu_voting). Here I have a screenshot of Marshall's key figure (Figure 3) that I replicated in stata and a verion in R that I created. In addition, I preformed the linearity test on my replicated figure, as suggested by Gelman and Zelizer (2015).
 
 
 ```{r data for graphic}
