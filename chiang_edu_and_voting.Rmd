@@ -20,13 +20,13 @@ load("Marshall2015_Original/raw-data/UK Election Data Replication.RData")
 
 ```
 
-## Abstract
+# Abstract
 
 Marshall (2015) shows the causal effect of additional years of schooling on voting conservative in his analysis of voting records before and after the British 1947 school-leaving age reform. I successfully replicated Marshall's code, except an update in the rdrobust package lead to slightly different coefficients. In an extension of Marshall's work I investigated treatment effect heterogenity between genders. Running rdrobust and creating regression discontinuity figures on male and female subsets of the data revealed Marshall's effect of more years of education increasing likelihood of voting conservative was stronger in women than men. This finding could complicate Marshall's argument that more education leads to higher income then to more conservative political opinions and perhaps reveals something about the differing effect of education on men and women. 
 
 
 
-## Introduction
+# Introduction
 
 Marshall (2015) uses data from the results of the 1947 high school leaving age reform in Great Britain, to analyze how additional years in high school affect political preferences [@main]. This paper looked specifically in how additional years in high school effected voting for the Conservative Party [@main]. In 1947, Great Britain changed the high school leaving age from 14 to 15, this induced almost half the student population to stay in school for at least 1 or 2 more years [@main]. Data from the 10 British elections between 1947 and 2010 was then used to compare voters young enough to have been effected by the reform to those who were too old to have been effected, using regression discontinuity [@main]. Regression discontinuity is usually used for determining if a program/treatment is effective, and essentially is is a pretest-posttest program-comparison group design strategy [@regression-discont]. Regression discontinuity is unique in that individuals are assigned to one of two groups, just based on if they are on either side of a pre-determined cut-off [@regression-discont].The results of data analysis revealed staying in high school for longer substantially increased likelihood to vote for the Conservative Party (staying one extra year increased probailitiy of voting Conservative by almost 12 percentage points), controlling for continuity of all other covariates [@main]. Marshall does further analysis to support a hypothesis where increased education leads to increased income which leads to voting more conservatively [@main]. This supports the previously studied fact that high school is extremely pertinent to political opinions later in life, and that more education generally leads to higher income and thus voting more conservative [@dev],[@meltz]. In addition, this significant finding indicates the education reform of 1947 may have had an even greater affect on politics and election results nationwide over many years than ever expected [@main]. 
 
@@ -40,7 +40,7 @@ Over the course of this paper, I will contextualize Marshall's 2015 paper in a l
 
 
 
-## Literature Review
+# Literature Review
 
 This paper is written as a response to mixed literature on education and voting preferences. On one hand, it has been suggested that education leads to more socially liberal attitudes. In 1959, Lipset proposed more education is assocaited with more liberal attitudes and support of democracy [@lipset]. Hyman and Wright support that analysis saying education leads to students thinking with a fundamentally liberal fashion [@hyman].
 
@@ -50,7 +50,7 @@ However, Marshall's paper was the first to directly address the causal effects o
 
 
 
-## Replication Process
+# Replication Process
 
 I was able to replicate all of the figures in stata (see appendix for this process). In addition, I replicated Marshall's figure 3 (his main finding) in R. 
 
@@ -64,7 +64,7 @@ This paper relies heavily on rdrobust models, and the reference material for lea
 
 
 
-## Extension
+# Extension
 
 ```{r women graphs}
 
@@ -240,7 +240,7 @@ In addition, this extension perhaps reveals something about the differing effect
 
 
 
-## Conclusion 
+# Conclusion 
 
 Marshall (2015) first proved that education attainment significantly increased after the 1947 school-leaving age reform in Great Britain. Then, using this reform and regression discontinuity design, demonstrated as years of schooling increased, so did one's likelihood to vote conservative, ensuring other covariatives maintained continuity around this cutoff. He postulated these findings were explained by a hypothesis that more schooling leads to higher income and then more conservative voting based on economic policies. This hypothesis is supported by previous reseatch that schooling leads to increased income [@dev] and that higher wage earners align more closely with the British Conservative party [@meltz].
 
@@ -255,7 +255,7 @@ These results are perhaps in conflict Marshall's argument that more education le
 In addition, this extension perhaps reveals something about the differing effect of education on men and women. Are women's political views more responsive to education? Women are generally more liberal then men, how does this result fit into this narrative? This extension certainly creates questions and opens new areas of study on the relationship between gender, education, and political views.
 
 
-## Appendix
+# Appendix
 
 I was able to replicate all of Marshall's figures and table code directly in stata. That code is available at this project's [repo](https://github.com/mollyechiang/gender_edu_voting). Here I have a screenshot of Marshall's key figure (Figure 3) that I replicated in stata and a verion in R that I created. In addition, I preformed the linearity test on my replicated figure, as suggested by Gelman and Zelizer (2015).
 
@@ -372,7 +372,7 @@ combine_plots(poly,
 
 \newpage 
 
-## References
+# References
 
 Reference material to create this bibliography comes from [@bib]
 
