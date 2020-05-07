@@ -62,24 +62,46 @@ Finally, I focused on replicating Marshall's main figures and tables, and did no
 
 ```{r women graphs}
 
+# select relevant columns and years
+# and choose only women
+
 w <- table %>%
   select(yearat14, con, male) %>%
   filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
   filter(male == 0)
 
+# find the total number of women per year/cohort
+# by grouping by yearat14 and counting
+
 w_num_per_year <- w %>%
   group_by(yearat14) %>%
   count()
+
+# find the number of women per year/cohort
+# that voted conservative 
 
 w_num_con_per_year <- w %>%
   group_by(yearat14) %>%
   count(con) %>%
   filter(con == 1)
 
+# join the two tables to generate proportion
+# of each year that voted conservative
+# add group 1 or 2 to the years before and
+# after 1947
+
 w_con_props <- left_join(w_num_per_year, w_num_con_per_year, by = "yearat14") %>%
   replace_na(list(con = 0, n.y = 0)) %>%
   summarize(con_prop = n.y/n.x) %>%
   mutate(group = c(rep("1", 23), rep("2", 23)))
+
+# create two versions of this graph with polynomial
+# and linear fits on either side of 1947
+# both have titles, lines at 1947, and colors for
+# which side of 1947 the points are on
+
+# geom_smooth added lines of best fit, loess 
+# was used to generate 4th order polynomial fits
 
 w_poly <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
@@ -89,6 +111,8 @@ w_poly <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) +
        x = "Cohort (year at age 14)",
        y = " ") +
   theme(legend.position = "none")
+
+# lm was used to generate linear fits
 
 w_linear <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
@@ -104,24 +128,45 @@ w_linear <- ggplot(w_con_props, aes(x = yearat14, y = con_prop, color = group)) 
 
 ```{r men graphs}
 
+# select relevant columns and years
+# and choose only men
+
 m <- table %>%
   select(yearat14, con, male) %>%
   filter(yearat14 >= 1925 & yearat14 <= 1970) %>%
   filter(male == 1)
 
+# find the total number of men per year/cohort
+# by grouping by yearat14 and counting
+
 m_num_per_year <- m %>%
   group_by(yearat14) %>%
   count()
+
+# find the number that voted conservative 
 
 m_num_con_per_year <- m %>%
   group_by(yearat14) %>%
   count(con) %>%
   filter(con == 1)
 
+# join the two tables to generate proportion
+# of each year that voted conservative
+# add group 1 or 2 to the years before and
+# after 1947
+
 m_con_props <- left_join(m_num_per_year, m_num_con_per_year, by = "yearat14") %>%
   replace_na(list(con = 0, n.y = 0)) %>%
   summarize(con_prop = n.y/n.x) %>%
   mutate(group = c(rep("1", 23), rep("2", 23)))
+
+# create two versions of this graph with polynomial
+# and linear fits on either side of 1947
+# both have titles, lines at 1947, and colors for
+# which side of 1947 the points are on
+
+# geom_smooth added lines of best fit, loess 
+# was used to generate 4th order polynomial fits
 
 m_poly <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
@@ -131,6 +176,8 @@ m_poly <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) +
        x = "Cohort (year at age 14)",
        y = "Proportion Voting Conservative") +
   theme(legend.position = "none")
+
+# lm was used to generate linear fits
 
 m_linear <- ggplot(m_con_props, aes(x = yearat14, y = con_prop, color = group)) + 
   geom_point() +
@@ -153,6 +200,9 @@ In addition to creating regression discontinuity figures with fourth-degree poly
 
 ```{r combined plots poly}
 
+# combine plots, add labels, adjust words
+# add title and caption
+
 combine_plots(m_poly, 
               w_poly,
               labels = c("(a)", "(b)"),
@@ -167,6 +217,8 @@ combine_plots(m_poly,
 ```
 
 ```{r combined plots linear }
+
+# combine plots again with joint title and caption
 
 combine_plots(m_linear, 
               w_linear,
@@ -185,13 +237,22 @@ The RDD I ran for the extension was based on what Marshall (2015) ran. I set my 
 
 ```{r rdrobust}
 
+# create model 1 using rdrobust on the raw data and the 
+# same variable specifications as Marshall (2015)
+
 model1 <- rdrobust(table$con, table$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
+
+# subset the data into two tibbles of all men
+# and all women
 
 female <- table %>%
   filter(male == 0)
 
 male <- table %>%
   filter(male == 1)
+
+# create rdrobust models for the subset data
+# again using the Marshall(2015) specifications
 
 malemodel <- rdrobust(male$con, male$yearat14, c = 1947, p = 1, q = 2, kernel = "tri", bwselect = "mserd", masspoints = "off")
 
@@ -200,6 +261,19 @@ femalemodel <- rdrobust(female$con, female$yearat14, c = 1947, p = 1, q = 2, ker
 ```
 
 ```{r table, results = "asis"}
+
+# create a data frame by pulling the results of the rdrobust models
+# this "by hand" method of creating the output table was necessary 
+# as the rdrobust package is so new/changes so much that most packages
+# that generate output tables for regressions (like stargazer) do not
+# support rdrobust models
+
+# pull the straight coefficient, the standard error and pvalue
+# for all three of the models
+
+# also include the number of observations that were included in each
+# of the models (info from the raw output of printint the rdrobust 
+# model)
 
 results_table <- data.frame(row = c("Estimated Effect of 1947 Reform", "Standard Error", "p-value", "Number of Observations"),
                     all = c(as.data.frame(model1["coef"])[1,1], 
@@ -214,6 +288,10 @@ results_table <- data.frame(row = c("Estimated Effect of 1947 Reform", "Standard
                                as.data.frame(femalemodel["se"])[1,1],
                                as.data.frame(femalemodel["pv"])[1,1],
                                15661))
+
+# using the data frame created by hand, pipe to gt
+# re-label to columns, add a title and subtitle
+# and specify decimals
 
 results_table %>%
   gt() %>%
